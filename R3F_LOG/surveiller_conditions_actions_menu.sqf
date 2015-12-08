@@ -1,6 +1,6 @@
 /*
-* Evalue régulièrement les conditions à vérifier pour autoriser les actions logistiques
- * Permet de diminuer la fréquence des vérifications des conditions normalement faites
+* Evalue rÃ©guliÃ¨rement les conditions Ã  vÃ©rifier pour autoriser les actions logistiques
+ * Permet de diminuer la frÃ©quence des vÃ©rifications des conditions normalement faites
  * dans les addAction (~60Hz) et donc de limiter la consommation CPU.
  * 
  * Copyright (C) 2014 Team ~R3F~
@@ -13,7 +13,7 @@
 private ["_joueur", "_vehicule_joueur", "_cursorTarget_distance", "_objet_pointe", "_objet_pas_en_cours_de_deplacement", "_fonctionnalites", "_pas_de_hook"];
 private ["_objet_deverrouille", "_objet_pointe_autre_que_deplace", "_objet_pointe_autre_que_deplace_deverrouille", "_isUav", "_usine_autorisee_client"];
 
-// Indices du tableau des fonctionnalités retourné par R3F_LOG_FNCT_determiner_fonctionnalites_logistique
+// Indices du tableau des fonctionnalitÃ©s retournÃ© par R3F_LOG_FNCT_determiner_fonctionnalites_logistique
 #define __can_be_depl_heli_remorq_transp 0
 #define __can_be_moved_by_player 1
 #define __can_lift 2
@@ -38,9 +38,11 @@ _objet_pointe = _cursorTarget_distance select 0;
 
 _isNOTlocked = locked _objet_pointe < 2;
 
+// Disallow towing 10m from an Exile construction to stop being able to steal vehicles through walls
+_nearBaseItems = count ( nearestObjects [_joueur,["Exile_Construction_Abstract_Static"],10] );
 
 if (call compile R3F_LOG_CFG_string_condition_allow_logistics_on_this_client &&
-!R3F_LOG_mutex_local_verrou && _vehicule_joueur == _joueur && !isNull _objet_pointe && _cursorTarget_distance select 1 < 3.75
+!R3F_LOG_mutex_local_verrou && _vehicule_joueur == _joueur && !isNull _objet_pointe && _cursorTarget_distance select 1 < 3.75  && _nearBaseItems == 0
 ) then
 {
 R3F_LOG_objet_addAction = _objet_pointe;
@@ -54,19 +56,19 @@ _isUav =  (getNumber (configFile >> "CfgVehicles" >> (typeOf _objet_pointe) >> "
 
 _usine_autorisee_client = call compile R3F_LOG_CFG_string_condition_allow_creation_factory_on_this_client;
 
-// L'objet est-il déverrouillé
+// L'objet est-il dÃ©verrouillÃ©
 _objet_deverrouille = !([_objet_pointe, _joueur] call R3F_LOG_FNCT_objet_est_verrouille);
 
-// Trouver l'objet pointé qui se trouve derrière l'objet en cours de déplacement
+// Trouver l'objet pointÃ© qui se trouve derriÃ¨re l'objet en cours de dÃ©placement
 _objet_pointe_autre_que_deplace = [R3F_LOG_joueur_deplace_objet, 3.75] call R3F_LOG_FNCT_3D_cursorTarget_virtuel;
 
 if (!isNull _objet_pointe_autre_que_deplace) then
 {
-// L'objet (pointé qui se trouve derrière l'objet en cours de déplacement) est-il déverrouillé
+// L'objet (pointÃ© qui se trouve derriÃ¨re l'objet en cours de dÃ©placement) est-il dÃ©verrouillÃ©
 _objet_pointe_autre_que_deplace_deverrouille = !([_objet_pointe_autre_que_deplace, _joueur] call R3F_LOG_FNCT_objet_est_verrouille);
 };
 
-// Si l'objet est un objet déplaçable
+// Si l'objet est un objet dÃ©plaÃ§able
 if (_fonctionnalites select __can_be_moved_by_player) then
 {
 // Condition action deplacer_objet
@@ -91,7 +93,7 @@ alive _objet_pointe_autre_que_deplace && (vectorMagnitude velocity _objet_pointe
 // Si l'objet est un objet remorquable
 if (_fonctionnalites select __can_be_towed) then
 {
-// Et qu'il est déplaçable
+// Et qu'il est dÃ©plaÃ§able
 if (_fonctionnalites select __can_be_moved_by_player) then
 {
 // Condition action remorquer_deplace
@@ -135,7 +137,7 @@ boundingBoxReal _x select 0 select 2
 ]
 );
 
-// L'arrière du remorqueur est proche de l'avant de l'objet pointé
+// L'arriÃ¨re du remorqueur est proche de l'avant de l'objet pointÃ©
 abs (_delta_pos select 0) < 3 && abs (_delta_pos select 1) < 5
 }
 } count (nearestObjects [_objet_pointe, ["All"], 30]) != 0
@@ -149,7 +151,7 @@ R3F_LOG_action_detacher_valide = (isNull R3F_LOG_joueur_deplace_objet) && _isNOT
 // Si l'objet est un objet transportable
 if (_fonctionnalites select __can_be_transported_cargo) then
 {
-// Et qu'il est déplaçable
+// Et qu'il est dÃ©plaÃ§able
 if (_fonctionnalites select __can_be_moved_by_player) then
 {
 // Condition action charger_deplace
@@ -169,7 +171,7 @@ isNull (_objet_pointe getVariable "R3F_LOG_est_transporte_par") && _isNOTlocked 
 _objet_pas_en_cours_de_deplacement && _objet_deverrouille && !(_objet_pointe getVariable "R3F_LOG_disabled");
 };
 
-// Si l'objet est un véhicule remorqueur
+// Si l'objet est un vÃ©hicule remorqueur
 if (_fonctionnalites select __can_tow) then
 {
 // Condition action remorquer_deplace
@@ -181,7 +183,7 @@ isNull (_objet_pointe getVariable "R3F_LOG_remorque") && (vectorMagnitude veloci
 _objet_deverrouille && !(_objet_pointe getVariable "R3F_LOG_disabled");
 };
 
-// Si l'objet est un véhicule transporteur
+// Si l'objet est un vÃ©hicule transporteur
 if (_fonctionnalites select __can_transport_cargo) then
 {
 // Condition action charger_deplace
@@ -231,7 +233,7 @@ _objet_pointe distance _x < 20 && !(_x getVariable "R3F_LOG_CF_disabled") && _is
 _x getVariable ["R3F_LOG_CF_side_addAction", side group _joueur] == side group _joueur
 } count R3F_LOG_CF_liste_usines != 0;
 
-// Condition déverrouiller objet
+// Condition dÃ©verrouiller objet
 R3F_LOG_action_deverrouiller_valide = _objet_pas_en_cours_de_deplacement && !_objet_deverrouille && !(_objet_pointe getVariable "R3F_LOG_disabled");
 }
 else
@@ -252,16 +254,16 @@ R3F_LOG_action_revendre_usine_selection_valide = false;
 R3F_LOG_action_deverrouiller_valide = false;
 };
 
-// Si le joueur est pilote dans un héliporteur
+// Si le joueur est pilote dans un hÃ©liporteur
 if (call compile R3F_LOG_CFG_string_condition_allow_logistics_on_this_client &&  _isNOTlocked &&
 !R3F_LOG_mutex_local_verrou && _vehicule_joueur != _joueur && driver _vehicule_joueur == _joueur && {_vehicule_joueur getVariable ["R3F_LOG_fonctionnalites", R3F_LOG_CST_zero_log] select __can_lift}
 ) then
 {
 R3F_LOG_objet_addAction = _vehicule_joueur;
 
-// Note : pas de restriction liée à R3F_LOG_proprietaire_verrou pour l'héliportage
+// Note : pas de restriction liÃ©e Ã  R3F_LOG_proprietaire_verrou pour l'hÃ©liportage
 
-// A partir des versions > 1.32, on interdit le lift si le hook de BIS est utilisé
+// A partir des versions > 1.32, on interdit le lift si le hook de BIS est utilisÃ©
 if (productVersion select 2 > 132) then
 {
 // Call compile car la commande getSlingLoad n'existe pas en 1.32
