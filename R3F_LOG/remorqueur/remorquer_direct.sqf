@@ -10,6 +10,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//AI generated territory build right check
 if (player call ExileClient_util_world_isInTerritory) then
 {
     if !(player call ExileClient_util_territory_hasBuildRights) then
