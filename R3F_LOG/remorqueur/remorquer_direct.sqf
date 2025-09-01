@@ -1,7 +1,7 @@
 /**
- * Remorque l'objet pointé au véhicule remorqueur valide le plus proche
+ * Remorque l'objet pointÃ© au vÃ©hicule remorqueur valide le plus proche
  * 
- * @param 0 l'objet à remorquer
+ * @param 0 l'objet Ã  remorquer
  * 
  * Copyright (C) 2014 Team ~R3F~
  * 
@@ -9,6 +9,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+if (player call ExileClient_util_world_isInTerritory) then
+{
+    if !(player call ExileClient_util_territory_hasBuildRights) then
+    {
+        ["ErrorTitle", ["You do not have permission to move/tow objects in this territory!"]] call ExileClient_gui_toaster_addTemplateToast;
+        exitWith {};
+    };
+};
 
 if (R3F_LOG_mutex_local_verrou) then
 {
@@ -50,7 +59,7 @@ else
 					]
 				);
 				
-				// L'arrière du remorqueur est proche de l'avant de l'objet pointé
+				// L'arriÃ¨re du remorqueur est proche de l'avant de l'objet pointÃ©
 				abs (_delta_pos select 0) < 3 && abs (_delta_pos select 1) < 5
 			}
 		) exitWith {_remorqueur = _x;};
@@ -65,7 +74,7 @@ else
 			_remorqueur setVariable ["R3F_LOG_remorque", _objet, true];
 			_objet setVariable ["R3F_LOG_est_transporte_par", _remorqueur, true];
 			
-			// On place le joueur sur le côté du véhicule en fonction qu'il se trouve à sa gauche ou droite
+			// On place le joueur sur le cÃ´tÃ© du vÃ©hicule en fonction qu'il se trouve Ã  sa gauche ou droite
 			if ((_remorqueur worldToModel (player modelToWorld [0,0,0])) select 0 > 0) then
 			{
 				player attachTo [_remorqueur, [
@@ -97,11 +106,11 @@ else
 			}];
 			sleep 2;
 			
-			// Quelques corrections visuelles pour des classes spécifiques
+			// Quelques corrections visuelles pour des classes spÃ©cifiques
 			if (typeOf _remorqueur == "B_Truck_01_mover_F") then {_offset_attach_y = 1.0;}
 			else {_offset_attach_y = 0.2;};
 			
-			// Attacher à l'arrière du véhicule au ras du sol
+			// Attacher Ã  l'arriÃ¨re du vÃ©hicule au ras du sol
 			_objet attachTo [_remorqueur, [
 				(boundingCenter _objet select 0),
 				(boundingBoxReal _remorqueur select 0 select 1) + (boundingBoxReal _objet select 0 select 1) + _offset_attach_y,
@@ -119,7 +128,7 @@ else
 				
 				_azimut_canon = ((_objet weaponDirection (weapons _objet select 0)) select 0) atan2 ((_objet weaponDirection (weapons _objet select 0)) select 1);
 				
-				// Seul le D30 a le canon pointant vers le véhicule
+				// Seul le D30 a le canon pointant vers le vÃ©hicule
 				if !(_objet isKindOf "D30_Base") then // All in Arma
 				{
 					_azimut_canon = _azimut_canon + 180;
